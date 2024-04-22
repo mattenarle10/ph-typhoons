@@ -37,7 +37,7 @@ def app():
   https://en.wikipedia.org/wiki/List_of_typhoons_in_the_Philippines_(2000%E2%80%93present)"""
   st.write(text)  
 
-  df = pd.read_csv('./ph-typhoons.csv', header=0)
+  df = pd.read_csv('./updated-ph-typhoons.csv', header=0)
 
   with st.expander('View Dataset'):
     # Load the data
