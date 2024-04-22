@@ -236,7 +236,7 @@ def app():
 
     ax1.set_title('Projected No. of Typhoons')
     ax1.plot(nextyear['Typhoons'], color='red', label='predicted next year')
-           ax1.set_xlabel('Month', fontsize=20, fontweight='bold')
+    ax1.set_xlabel('Month', fontsize=20, fontweight='bold')
     ax1.set_ylabel('No. of Typhoons', fontsize=20, fontweight='bold')
     ax1.set_xticks(np.arange(len(nextyear['Month'])))  # Set xticks based on the number of months in nextyear
     ax1.set_xticklabels(nextyear['Month'], rotation=45)  # Set xtick labels using month values from nextyear
