@@ -6,8 +6,6 @@ from sklearn.metrics import mean_squared_error, mean_absolute_error
 from sklearn.preprocessing import MinMaxScaler
 import matplotlib.pyplot as plt
 import time
-import plotly.express as px  # or import plotly.graph_objects as go
-
 
 if "data_norm" not in st.session_state:
   st.session_state.data_norm = None
@@ -17,7 +15,7 @@ if "model" not in st.session_state:
 
 def app():
   st.subheader('RNN-LSTM Based Typhoon Prediction in the Philippines')
-
+   
   text = """ Updated by: Matthew Ariel A. Enarle BSCS 3-B AI
   \nUpdated the dataset to fit the List of typhoons in the Philippines (2000–present)
   \nMade by: Prof. Louie F. Cervantes, M. Eng. (Information Engineering)
@@ -27,38 +25,36 @@ def app():
   *West Visayas State University"""
   st.text(text)
 
-  text = """This Streamlit app utilizes a bi-directional Recurrent Neural Network 
-  (RNN) with Long Short-Term Memory (LSTM) units to analyze historical typhoon 
-  data and forecast the likelihood of typhoons affecting the Philippines in a 
-  given month. Users can interact with the app to visualize past typhoon 
-  patterns and receive monthly forecasts, potentially aiding in disaster 
+  text = """This Streamlit app utilizes a bi-directional Recurrent Neural Network 
+  (RNN) with Long Short-Term Memory (LSTM) units to analyze historical typhoon 
+  data and forecast the likelihood of typhoons affecting the Philippines in a 
+  given month. Users can interact with the app to visualize past typhoon 
+  patterns and receive monthly forecasts, potentially aiding in disaster 
   preparedness efforts."""
   st.write(text)
 
-  text = """The data is obtained from the following site : 
+  text = """The data is obtained from the following site : 
   https://en.wikipedia.org/wiki/List_of_typhoons_in_the_Philippines_(2000%E2%80%93present)"""
-  st.write(text)
+  st.write(text)  
 
   df = pd.read_csv('./ph-typhoons.csv', header=0)
 
   with st.expander('View Dataset'):
     # Load the data
-    st.write(df)
+    st.write(df)   
     st.write(df.shape)
 
-  # Re-index the dataframe using datetime (without time)
-  df.set_index(pd.to_datetime(df['Month'], format='%Y-%m'), inplace=True)  # Set index to datetime without time
+  #re-index and use the Month column data convert to numpy datatime datatype
+  df.index = np.array(df['Month'], dtype='datetime64')
   time_axis = df.index
 
-  # Plot the data with zooming and panning
+  # Plot the data
   fig, ax = plt.subplots()
-  ax.plot(df['Typhoons'])
-  ax.set_xlabel("Month")
+  ax.plot(df['Typhoons']) 
+  ax.set_xlabel("Time")
   ax.set_ylabel("No. of Typhoons")
   ax.set_title("Time Series Plot of Typhoons")
-  # Enable zooming and panning
-  fig.update_layout(xaxis_rangeselectable=True, yaxis_rangeselectable=True)
-  st.plotly_chart(fig)  # Use plotly for zooming and panning
+  st.pyplot(fig)   
 
   # Normalize the data
   scaler = MinMaxScaler(feature_range=(0, 1))
@@ -81,41 +77,40 @@ def app():
   y_train = y_train.to_numpy()
   y_test = y_test.to_numpy()
 
-  look_back = 12  # Number of past days to consider
-  n_features = 1  # Number of features in your typhoon data
+  look_back = 12 # Number of past days to consider
+  n_features = 1 # Number of features in your typhoon data
 
-  model = tf.keras.Sequential([  # Use Bidirectional LSTM or GRU (comment out the other)
-    # tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(128, return_sequences=True), input_shape=(look_back, n_features)),
+  model = tf.keras.Sequential([ # Use Bidirectional LSTM or GRU (comment out the other)
+    #tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(128, return_sequences=True), input_shape=(look_back, n_features)),
     tf.keras.layers.GRU(128, return_sequences=True, input_shape=(look_back, n_features)),
     tf.keras.layers.Dropout(0.3),
-    tf.keras.layers.GRU(64, return_sequences=True),  # Another GRU layer
+    tf.keras.layers.GRU(64, return_sequences=True), # Another GRU layer
     tf.keras.layers.Dropout(0.2),
-    tf.keras.layers.GRU(32),  # Reduced units for final layer
+    tf.keras.layers.GRU(32), # Reduced units for final layer
     tf.keras.layers.Dropout(0.1),
     tf.keras.layers.Dense(1)
   ])
 
   # Compile the model
-  model.compile(loss="mse", optimizer="adam")  # You can adjust loss and optimizer based on your needs
+  model.compile(loss="mse", optimizer="adam") # You can adjust loss and optimizer based on your needs
 
   # Print model summary
   model.summary()
-
+   
   if st.sidebar.button("Start Training"):
-    progress_bar = st.progress(0, text="Training the LSTM network, please wait...")
-
+    progress_bar = st.progress(0, text="Training the LSTM network, please wait...")      
     # Train the model
     history = model.fit(x_train, y_train, epochs=200, batch_size=64, validation_data=(x_test, y_test))
 
-    fig, ax = plt.subplots()  # Create a figure and an axes
-    ax.plot(history.history['loss'], label='Train')  # Plot training loss on ax
-    ax.plot(history.history['val_loss'], label='Validation')  # Plot validation loss on ax
+    fig, ax = plt.subplots() # Create a figure and an axes
+    ax.plot(history.history['loss'], label='Train') # Plot training loss on ax
+    ax.plot(history.history['val_loss'], label='Validation') # Plot validation loss on ax
 
-    ax.set_title('Model loss')  # Set title on ax
-    ax.set_ylabel('Loss')  # Set y-label on ax
-    ax.set_xlabel('Epoch')  # Set x-label on ax
+    ax.set_title('Model loss') # Set title on ax
+    ax.set_ylabel('Loss') # Set y-label on ax
+    ax.set_xlabel('Epoch') # Set x-label on ax
 
-    ax.legend()  # Add legend
+    ax.legend() # Add legend
     st.pyplot(fig)
     st.session_state.model = model
 
@@ -126,9 +121,9 @@ def app():
       # Simulate some time-consuming task (e.g., sleep)
       time.sleep(0.01)
     # Progress bar reaches 100% after the loop completes
-    st.success("LSTM Network training completed!")
+    st.success("LSTM Network training completed!") 
 
-  years = st.sidebar.slider(
+  years = st.sidebar.slider(  
     label="Set the number years to project:",
     min_value=2,
     max_value=6,
@@ -153,7 +148,6 @@ def app():
 
     model = st.session_state.model
     data_norm = st.session_state.data_norm
-
     # Get predicted data from the model using the normalized values
     predictions = model.predict(data_norm)
 
@@ -161,16 +155,14 @@ def app():
     predvalues = scaler.inverse_transform(np.array(predictions).reshape(-1, 1))
     predvalues = pd.DataFrame(predvalues)
 
-    # Convert column 'Typhoons' to integer (optional, for consistency)
-    # predvalues[0] = predvalues[0].astype(int)
+    # Convert column 'Typhoons' to integer
+    predvalues[0] = predvalues[0].astype(int)
 
-
-    pred_period = years * 12
-
+    pred_period = years * 12   
     # Use the model to predict the next year of data
-    input_seq_len = 24
-    num_features = 1
-    last_seq = data_norm[-input_seq_len:]  # Use the last year of training data as the starting sequence
+    input_seq_len = 24     
+    num_features=1
+    last_seq = data_norm[-input_seq_len:] # Use the last year of training data as the starting sequence
 
     preds = []
     for i in range(pred_period):
@@ -184,34 +176,35 @@ def app():
     # Inverse transform the predictions to get the original scale
     prednext = scaler.inverse_transform(np.array(preds).reshape(-1, 1))
 
-    # flatten the array from 2-dim to 1-dim
+    #flatten the array from 2-dim to 1-dim
     prednext = [item for sublist in prednext for item in sublist]
 
-    # Generate an array of dates (without time) for the predicted years
+
+    # Generate an array of datetime64 objects from January 1976 to December 1976
     if pred_period == 12:
-      end_date = '2023-12-31'
+      end = '2023-12'
     elif pred_period == 24:
-      end_date = '2024-12-31'
+      end = '2024-12' 
     elif pred_period == 36:
-      end_date = '2025-12-31'
+      end = '2025-12'
     elif pred_period == 48:
-      end_date = '2026-12-31'
+      end = '2026-12'
     elif pred_period == 60:
-      end_date = '2027-12-31'
+      end = '2027-12'
     elif pred_period == 72:
-      end_date = '2028-12-31'
+      end = '2028-12'
 
-    months = pd.date_range(start='2023-01-01', end=end_date, freq='M')
+    months = pd.date_range(start='2023-01', end=end, freq='MS')
 
-    # Create a Pandas DataFrame with the date (without time) and values columns
+    # Create a Pandas DataFrame with the datetime and values columns
     nextyear = pd.DataFrame({'Month': months, 'Typhoons': prednext})
 
-    # Convert column 'Typhoons' to integer (optional, for consistency)
-    # nextyear['Typhoons'] = nextyear['Typhoons'].astype(int)
+    # Convert column 'Typhoons' to integer
+    nextyear['Typhoons'] = nextyear['Typhoons'].astype(int)
 
     time_axis = np.linspace(0, df.shape[0]-1, pred_period)
     time_axis = np.array([int(i) for i in time_axis])
-    time_axisLabels = np.array(df.index)  # No need to convert to datetime as time info is removed
+    time_axisLabels = np.array(df.index, dtype='datetime64[D]')
 
     fig = plt.figure()
     ax = fig.add_axes([0, 0, 2.1, 2])
@@ -232,7 +225,7 @@ def app():
     ax.set_xticks(time_axis)
     ax.set_xlabel('\nMonth', fontsize=20, fontweight='bold')
     ax.set_ylabel('No. of Typhoons', fontsize=20, fontweight='bold')
-    ax.set_xticklabels(time_axisLabels[time_axis], rotation=45)
+    ax.set_xticklabels(time_axisLabels[time_axis], rotation=45)     
     ax.legend(loc='best', prop={'size':20})
     ax.tick_params(size=10, labelsize=15)
 
@@ -240,14 +233,13 @@ def app():
     ax1.plot(nextyear['Typhoons'], color='red', label='predicted next year')
     ax1.set_xlabel('Month', fontsize=20, fontweight='bold')
     ax1.set_ylabel('No. of Typhoons', fontsize=20, fontweight='bold')
-    ax1.set_xticks(np.arange(len(nextyear['Month'])))  # Set xticks based on the number of months in nextyear
-    ax1.set_xticklabels(nextyear['Month'], rotation=45)  # Set xtick labels using month values from nextyear
+    ax1.set_xticklabels(np.array(nextyear['Month'], dtype='datetime64[D]'), rotation=45)     
     ax1.tick_params(size=10, labelsize=15)
 
-    st.pyplot(fig)
+    st.pyplot(fig)  
 
     st.write('Predicted Typhoons for the next', years, 'years:')
     st.write(nextyear)
 
 if __name__ == '__main__':
-  app()
+  app() 
