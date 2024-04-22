@@ -6,6 +6,8 @@ from sklearn.metrics import mean_squared_error, mean_absolute_error
 from sklearn.preprocessing import MinMaxScaler
 import matplotlib.pyplot as plt
 import time
+import plotly.express as px  # or import plotly.graph_objects as go
+
 
 if "data_norm" not in st.session_state:
   st.session_state.data_norm = None
